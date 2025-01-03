@@ -7,23 +7,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
+            --primary-color: #0f172a;
+            --secondary-color: #1e293b;
+            --accent-color: #3b82f6;
             --background-color: #f8fafc;
             --card-background: #ffffff;
-            --text-color: #1f2937;
-            --border-color: #e5e7eb;
-            --spacing-unit: clamp(0.5rem, 2vw, 1rem);
+            --text-color: #334155;
+            --border-color: #e2e8f0;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -33,216 +34,185 @@
         }
 
         .header {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: var(--spacing-unit);
+            padding: 1.5rem;
             text-align: center;
-            margin-bottom: clamp(1rem, 4vw, 2rem);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .header h1 {
-            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-size: 2.25rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            font-size: clamp(0.875rem, 2vw, 1rem);
-            opacity: 0.9;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .container {
             width: min(1200px, 95%);
             margin: 0 auto;
-            padding: var(--spacing-unit);
+            padding: 1rem;
             flex: 1;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: minmax(280px, 1fr) minmax(280px, 2fr);
-            gap: clamp(1rem, 4vw, 2rem);
+            grid-template-columns: minmax(300px, 1fr) minmax(300px, 2fr);
+            gap: 2rem;
             align-items: start;
         }
 
         .card {
             background-color: var(--card-background);
-            border-radius: 8px;
-            padding: clamp(1rem, 3vw, 1.5rem);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            height: fit-content;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .form-group {
-            margin-bottom: clamp(0.75rem, 2vw, 1rem);
-        }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: clamp(0.875rem, 2vw, 1rem);
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: clamp(0.875rem, 2vw, 1rem);
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
             transition: all 0.2s ease;
+            background-color: #f8fafc;
             resize: none;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .chart-options {
-            background-color: #f3f4f6;
-            border-radius: 6px;
-            padding: clamp(0.75rem, 2vw, 1rem);
-            margin: clamp(0.75rem, 2vw, 1rem) 0;
-        }
-
-        .chart-options .form-group {
-            margin-bottom: 0.5rem;
-        }
-
-        .chart-options label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-
-        input[type="checkbox"] {
-            width: 1.25rem;
-            height: 1.25rem;
-            cursor: pointer;
-        }
-
-        .button-group {
-            display: flex;
-            gap: clamp(0.5rem, 2vw, 1rem);
-            flex-wrap: wrap;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background-color: white;
         }
 
         .btn {
-            flex: 1;
-            min-width: 120px;
-            padding: clamp(0.625rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 6px;
-            font-size: clamp(0.875rem, 2vw, 1rem);
-            font-weight: 500;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--accent-color), #2563eb);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
         .btn-secondary {
-            background-color: #6b7280;
+            background: linear-gradient(135deg, #64748b, #475569);
             color: white;
         }
 
         .btn-secondary:hover {
-            background-color: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
         }
 
         .chart-container {
             position: relative;
-            height: clamp(300px, 50vh, 400px);
+            height: 400px;
             width: 100%;
-            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .chart-options {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+            animation-delay: calc(var(--animation-order) * 0.1s);
         }
         #new
         {
             float: right;
-            max-width:20px;
+            max-width:100px;
         }
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
             }
 
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .chart-container {
-                height: clamp(250px, 40vh, 300px);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                width: 100%;
-                padding: 0.5rem;
+            .header h1 {
+                font-size: 1.75rem;
             }
 
             .card {
-                border-radius: 4px;
                 padding: 1rem;
-            }
-
-            .chart-options {
-                padding: 0.75rem;
-            }
-        }
-        @media (max-width: 320px) {
-            :root {
-                --container-padding: var(--spacing-xs);
-                --card-padding: var(--spacing-sm);
-            }
-
-            .chart-container {
-                height: min(40vh, 250px);
             }
         }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>2d Graph Generator</h1>
-        <a href="new.html"><button id="new" type="button" class="btn">3-d</button></a>
+        <h1>2-d Graph Generator</h1>
+        <a href="3-d.html"><button id="new" type="button" class="btn">3-d</button></a>
     </header>
     <div class="container">
         <div class="grid">
             <div class="card">
-                <h2>Graph Settings</h2>
+                <h2 style="margin-bottom: 1.5rem; color: var(--primary-color);">Graph Settings</h2>
                 <form id="graph-form" onsubmit="return false;">
-                    <div class="form-group">
-                        <label for="data-input">Data Values:</label>
+                    <div class="form-group" style="--animation-order: 1">
+                        <label for="data-input">Data Values</label>
                         <textarea id="data-input" rows="3" placeholder="Enter values (comma separated)&#10;e.g., 10, 20, 30, 40"></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="labels-input">Labels:</label>
+                    <div class="form-group" style="--animation-order: 2">
+                        <label for="labels-input">Labels</label>
                         <textarea id="labels-input" rows="3" placeholder="Enter labels (comma separated)&#10;e.g., Q1, Q2, Q3, Q4"></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="graph-type">Chart Type:</label>
+                    <div class="form-group" style="--animation-order: 3">
+                        <label for="graph-type">Chart Type</label>
                         <select id="graph-type">
                             <option value="bar">Bar Chart</option>
                             <option value="line">Line Chart</option>
@@ -253,25 +223,25 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="chart-title">Chart Title:</label>
+                    <div class="form-group" style="--animation-order: 4">
+                        <label for="chart-title">Chart Title</label>
                         <input type="text" id="chart-title" placeholder="Enter chart title">
                     </div>
 
                     <div class="chart-options">
-                        <div class="form-group">
+                        <div class="form-group" style="--animation-order: 5">
                             <label>
                                 <input type="checkbox" id="show-grid" checked>
                                 Show Grid Lines
                             </label>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="--animation-order: 6">
                             <label>
                                 <input type="checkbox" id="show-legend" checked>
                                 Show Legend
                             </label>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="--animation-order: 7">
                             <label>
                                 <input type="checkbox" id="animate" checked>
                                 Enable Animations
@@ -279,7 +249,7 @@
                         </div>
                     </div>
 
-                    <div class="button-group">
+                    <div class="button-group" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                         <button class="btn btn-primary" onclick="generateGraph()">Generate Graph</button>
                         <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
                     </div>
@@ -290,7 +260,7 @@
                 <div class="chart-container">
                     <canvas id="graph"></canvas>
                 </div>
-                <div class="button-group">
+                <div class="button-group" style="display: flex; gap: 1rem;">
                     <button class="btn btn-primary" onclick="downloadGraph('png')">Download PNG</button>
                     <button class="btn btn-secondary" onclick="downloadGraph('jpg')">Download JPG</button>
                 </div>
@@ -319,7 +289,6 @@
 
                 const labels = labelsInput.split(',').map(item => item.trim());
 
-                // Validate inputs
                 if (data.length === 0 || labels.length === 0) {
                     throw new Error('Please provide both data and labels');
                 }
@@ -328,64 +297,96 @@
                     throw new Error('Number of data points must match number of labels');
                 }
 
-                // Destroy
                 if (chartInstance) {
                     chartInstance.destroy();
                 }
 
-                //colors
                 const colors = generateColors(data.length);
-
-                // new chart
                 const ctx = document.getElementById('graph').getContext('2d');
-                chartInstance = new Chart(ctx, {
+
+                const config = {
                     type: graphType,
                     data: {
                         labels: labels,
                         datasets: [{
                             label: chartTitle || 'Dataset',
                             data: data,
-                            backgroundColor: colors,
+                            backgroundColor: colors.map(color => `${color}CC`),
                             borderColor: graphType === 'line' ? colors[0] : colors,
                             borderWidth: 2,
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: graphType === 'line' ? 'origin' : undefined,
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         animation: {
-                            duration: enableAnimations ? 1000 : 0
+                            duration: enableAnimations ? 1500 : 0,
+                            easing: 'easeInOutQuart'
                         },
                         plugins: {
                             legend: {
                                 display: showLegend,
                                 position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    padding: 20
+                                }
                             },
                             title: {
                                 display: !!chartTitle,
                                 text: chartTitle,
                                 font: {
-                                    size: 16,
+                                    size: 18,
                                     weight: 'bold'
-                                }
+                                },
+                                padding: 20
                             }
                         },
                         scales: {
                             x: {
                                 grid: {
-                                    display: showGrid
+                                    display: showGrid,
+                                    color: '#e2e8f0'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
                                 }
                             },
                             y: {
                                 grid: {
-                                    display: showGrid
+                                    display: showGrid,
+                                    color: '#e2e8f0'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
                                 },
                                 beginAtZero: true
                             }
+                        },
+                        transitions: {
+                            active: {
+                                animation: {
+                                    duration: 400
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
                         }
                     }
-                });
+                };
+
+                chartInstance = new Chart(ctx, config);
 
             } catch (error) {
                 alert(`Error: ${error.message}`);
@@ -394,18 +395,17 @@
 
         function generateColors(count) {
             const baseColors = [
-                '#2563eb', '#dc2626', '#059669', '#7c3aed', '#ea580c',
-                '#0284c7', '#be123c', '#047857', '#6d28d9', '#92400e'
+                '#3b82f6', '#ef4444', '#10b981', '#8b5cf6', '#f97316',
+                '#0ea5e9', '#ec4899', '#14b8a6', '#6366f1', '#f59e0b'
             ];
             
             if (count <= baseColors.length) {
                 return baseColors.slice(0, count);
             }
 
-            // If we need more colors, generate them
             const colors = [...baseColors];
             for (let i = baseColors.length; i < count; i++) {
-                const hue = (i * 137.508) % 360; 
+                const hue = (i * 137.508) % 360;
                 colors.push(`hsl(${hue}, 70%, 50%)`);
             }
             return colors;
@@ -432,7 +432,6 @@
             }
         }
 
-        // sample data
         window.onload = function() {
             document.getElementById('data-input').value = '65, 59, 80, 81, 56, 55, 40';
             document.getElementById('labels-input').value = 'Mon, Tue, Wed, Thu, Fri, Sat, Sun';
