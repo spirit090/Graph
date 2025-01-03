@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Graph Generator</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+       :root {
+            --primary-color: #0f172a;
+            --secondary-color: #1e293b;
+            --accent-color: #3b82f6;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--background-color), #edf2f7);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .container {
+            width: min(1400px, 95%);
+            margin: 2rem auto;
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(300px, 1fr) minmax(300px, 2fr);
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+            resize: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background-color: white;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, var(--accent-color), #2563eb);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::after {
+            width: 300%;
+            height: 300%;
+        }
+
+        .chart-container {
+            height: 700px;
+            width: 100%;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chart-container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>3D Graph Generator</h1>
+        <a href="index.html"><button style="float: right;" type="button" class="btn">2-d</button></a>
+    </header>
+    <div class="container">
+        <div class="grid">
+            <div class="card">
+                <h2>Graph Settings</h2>
+                <form id="graph-form">
+                    <div class="form-group">
+                        <label for="x-input">X Values</label>
+                        <textarea id="x-input" rows="3" placeholder="Enter X values (comma separated)&#10;Example: 1, 2, 3, 4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y-input">Y Values</label>
+                        <textarea id="y-input" rows="3" placeholder="Enter Y values (comma separated)&#10;Example: 10, 20, 30, 40"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="z-input">Z Values</label>
+                        <textarea id="z-input" rows="3" placeholder="Enter Z values (comma separated)&#10;Example: 5, 10, 15, 20"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="graph-type">Visualization Type</label>
+                        <select id="graph-type">
+                            <option value="3dscatter">3D Scatter Plot</option>
+                            <option value="3dline">3D Line Plot</option>
+                            <option value="3dsurface">3D Surface Plot</option>
+                            <option value="3dbar">3D Bar Chart</option>
+                            <option value="3dcontour">3D Contour Plot</option>
+                            <option value="3dmesh">3D Mesh Plot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chart-title">Visualization Title</label>
+                        <input type="text" id="chart-title" placeholder="Enter a title for your visualization">
+                    </div>
+
+                    <button type="button" class="btn" onclick="generateGraph()">Generate Visualization</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="chart-container" id="graph"><p>Graph</p></div>
+            </div>
+        </div>
+    </div>
+    <script>
+           function parseData() {
+            const xInput = document.getElementById('x-input').value;
+            const yInput = document.getElementById('y-input').value;
+            const zInput = document.getElementById('z-input').value;
+
+            const xValues = xInput.split(',').map(item => parseFloat(item.trim()));
+            const yValues = yInput.split(',').map(item => parseFloat(item.trim()));
+            const zValues = zInput.split(',').map(item => parseFloat(item.trim()));
+
+            if (xValues.length !== yValues.length || xValues.length !== zValues.length) {
+                throw new Error('X, Y, and Z values must have the same length');
+            }
+
+            if (xValues.includes(NaN) || yValues.includes(NaN) || zValues.includes(NaN)) {
+                throw new Error('Please enter valid numbers');
+            }
+
+            return { x: xValues, y: yValues, z: zValues };
+        }
+
+        function create3DChart() {
+            try {
+                const { x, y, z } = parseData();
+                const type = document.getElementById('graph-type').value;
+                const title = document.getElementById('chart-title').value;
+
+                let trace;
+                let layout = {
+                    title: title || '3D Graph',
+                    autosize: true,
+                    scene: {
+                        camera: {
+                            eye: { x: 1.5, y: 1.5, z: 1.5 },
+                            animation: {
+                                duration: 1000,
+                                easing: 'cubic-in-out'
+                            }
+                        }
+                    },
+                    margin: { l: 0, r: 0, b: 0, t: 30 },
+                    transition: {
+                        duration: 500,
+                        easing: 'cubic-in-out'
+                    }
+                };
+
+                switch(type) {
+                    case '3dscatter':
+                        trace = {
+                            type: 'scatter3d',
+                            mode: 'markers',
+                            x: x,
+                            y: y,
+                            z: z,
+                            marker: {
+                                size: 5,
+                                opacity: 0,
+                                color: z,
+                                colorscale: 'Viridis',
+                                showscale: true
+                            }
+                        };
+                        break;
+
+                    case '3dline':
+                        trace = {
+                            type: 'scatter3d',
+                            mode: 'lines',
+                            x: x,
+                            y: y,
+                            z: z,
+                            line: {
+                                color: z,
+                                colorscale: 'Viridis',
+                                width: 4
+                            }
+                        };
+                        break;
+
+                    case '3dsurface':
+                        const size = Math.ceil(Math.sqrt(x.length));
+                        const surfaceZ = [];
+                        for (let i = 0; i < size; i++) {
+                            surfaceZ[i] = z.slice(i * size, (i + 1) * size);
+                        }
+                        trace = {
+                            type: 'surface',
+                            z: surfaceZ,
+                            x: surfaceZ.map(() => x),
+                            y: surfaceZ.map(() => y),
+                            colorscale: 'Viridis',
+                            showscale: true,
+                            opacity: 0.8
+                        };
+                        break;
+
+                    case '3dbar':
+                        trace = {
+                            type: 'bar3d',
+                            x: x,
+                            y: y,
+                            z: z,
+                            color: z,
+                            colorscale: 'Viridis',
+                            showscale: true,
+                            opacity: 0.8
+                        };
+                        break;
+
+                    case '3dcontour':
+                        trace = {
+                            type: 'contour3d',
+                            x: x,
+                            y: y,
+                            z: z,
+                            contours: {
+                                show: true,
+                                usecolormap: true,
+                                project: { x: true, y: true, z: true }
+                            },
+                            colorscale: 'Viridis',
+                            showscale: true,
+                            opacity: 0.8
+                        };
+                        break;
+
+                    case '3dmesh':
+                        trace = {
+                            type: 'mesh3d',
+                            x: x,
+                            y: y,
+                            z: z,
+                            opacity: 0.8,
+                            color: z,
+                            colorscale: 'Viridis',
+                            showscale: true
+                        };
+                        break;
+                }
+
+                const graphContainer = document.querySelector('.chart-container');
+                graphContainer.classList.remove('visible');
+                
+                setTimeout(() => {
+                    Plotly.newPlot('graph', [trace], layout).then(() => {
+                        graphContainer.classList.add('visible');
+                        
+                        if (type === '3dscatter') {
+                            Plotly.restyle('graph', {
+                                'marker.opacity': 1,
+                                'marker.size': 5
+                            }, [0]);
+                        }
+                    });
+                }, 300);
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+        
+        
+        function generateGraph() {
+            const btn = event.target;
+            btn.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+                create3DChart();
+            }, 150);
+        }
+
+        function resetForm() {
+            const form = document.getElementById('graph-form');
+            const graphDiv = document.getElementById('graph');
+            const graphContainer = document.querySelector('.chart-container');
+            graphContainer.classList.remove('visible');
+            form.reset();
+            graphDiv.innerHTML = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const graphContainer = document.querySelector('.chart-container');
+            setTimeout(() => {
+                graphContainer.classList.add('visible');
+            }, 800);
+        });
+    </script>
+</body>
+</html>
